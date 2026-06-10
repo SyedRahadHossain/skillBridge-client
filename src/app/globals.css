@@ -1,15 +1,12 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "shadcn/tailwind.css";
-
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -39,92 +36,106 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --background: #f0f9ff;
+  --foreground: #023047;
+  --card: #ffffff;
+  --card-foreground: #023047;
+  --popover: #ffffff;
+  --popover-foreground: #023047;
+  --primary: #219ebc;
+  --primary-foreground: #ffffff;
+  --secondary: #daf0fa;
+  --secondary-foreground: #023047;
+  --muted: #e2f4fb;
+  --muted-foreground: #2a6a85;
+  --accent: #ffb703;
+  --accent-foreground: #023047;
+  --destructive: #fb8500;
+  --border: #b8e0f0;
+  --input: #cceaf7;
+  --ring: #219ebc;
+  --chart-1: #219ebc;
+  --chart-2: #023047;
+  --chart-3: #ffb703;
+  --chart-4: #fb8500;
+  --chart-5: #8ecae6;
+  --sidebar: #daf0fa;
+  --sidebar-foreground: #023047;
+  --sidebar-primary: #219ebc;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #c2e8f5;
+  --sidebar-accent-foreground: #023047;
+  --sidebar-border: #b8e0f0;
+  --sidebar-ring: #219ebc;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* 3-layer depth: sidebar < background < card */
+  --background: #0a1628;
+  --foreground: #e8f4f8;
+
+  --card: #112240;
+  --card-foreground: #e8f4f8;
+
+  --popover: #112240;
+  --popover-foreground: #e8f4f8;
+
+  /* Amber as primary — matches the orange CTA buttons */
+  --primary: #ffb703;
+  --primary-foreground: #0a1628;
+
+  --secondary: #1a2f4a;
+  --secondary-foreground: #8ecae6;
+
+  --muted: #0d1e35;
+  --muted-foreground: #8ecae6;
+
+  /* Teal as accent — matches "Book a Lesson" buttons */
+  --accent: #219ebc;
+  --accent-foreground: #ffffff;
+
+  --destructive: #fb8500;
+
+  --border: rgba(142, 202, 230, 0.15);
+  --input: rgba(142, 202, 230, 0.1);
+  --ring: #219ebc;
+
+  --chart-1: #ffb703;
+  --chart-2: #8ecae6;
+  --chart-3: #fb8500;
+  --chart-4: #219ebc;
+  --chart-5: #023047;
+
+  /* Sidebar darkest — footer-like depth */
+  --sidebar: #060f1e;
+  --sidebar-foreground: #e8f4f8;
+  --sidebar-primary: #ffb703;
+  --sidebar-primary-foreground: #0a1628;
+  --sidebar-accent: #1a2f4a;
+  --sidebar-accent-foreground: #8ecae6;
+  --sidebar-border: rgba(142, 202, 230, 0.12);
+  --sidebar-ring: #219ebc;
 }
 
 @layer base {
+
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
-  html {
-    @apply font-sans;
-  }
+
 }
