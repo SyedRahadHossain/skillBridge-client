@@ -49,8 +49,8 @@ export default async function DashboardLayout({
 
   return (
     <SidebarProvider
-      // defaultOpen={false}
-      // style={{ "--sidebar-width": "70vw" } as React.CSSProperties}
+    // defaultOpen={false}
+    // style={{ "--sidebar-width": "70vw" } as React.CSSProperties}
     >
       <AppSidebar user={{ role: user.role }} />
       <SidebarInset>
