@@ -74,7 +74,7 @@ export default function AvailabilityForm({ existing }: { existing: AvailabilityS
         const daySlots = getDaySlots(day);
         return (
           <Card key={day}>
-            <CardHeader className="pb-3">
+            <CardHeader className="">
               <CardTitle className="text-base flex items-center justify-between">
                 <span>{day}</span>
                 <Button
@@ -126,7 +126,7 @@ export default function AvailabilityForm({ existing }: { existing: AvailabilityS
         );
       })}
 
-      <Button onClick={handleSave} disabled={loading} className="w-full md:w-auto">
+      <Button onClick={handleSave} disabled={loading} size={"sm"} className="w-fit">
         {loading ? "Saving..." : "Save Availability"}
       </Button>
     </div>
