@@ -1,18 +1,192 @@
-import { userService } from "@/services/user.service";
-import { reviewService } from "@/services/review.service";
-import { redirect } from "next/navigation";
+// import { userService } from "@/services/user.service";
+// import { reviewService } from "@/services/review.service";
+// import { redirect } from "next/navigation";
+// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+// import { Star } from "lucide-react";
+
+// export default async function TutorReviewsPage() {
+//   const { data: session } = await userService.getSession();
+//   const user = session?.user as any;
+
+//   if (user?.role !== "tutor") redirect("/dashboard");
+
+//   // getMe returns user object with tutorProfile.id nested
+//   const { data: me } = await userService.getMe();
+//   const tutorProfileId = me?.tutorProfile?.id;
+
+//   if (!tutorProfileId) {
+//     return (
+//       <div className="flex flex-col gap-6">
+//         <h1 className="text-2xl font-bold">My Reviews</h1>
+//         <Card>
+//           <CardContent className="py-12 text-center text-muted-foreground">
+//             Complete your tutor profile first to receive reviews.
+//           </CardContent>
+//         </Card>
+//       </div>
+//     );
+//   }
+
+//   const { data: reviews } = await reviewService.getReviewsByTutor(tutorProfileId);
+//   const reviewList = Array.isArray(reviews) ? reviews : [];
+
+//   const avgRating = reviewList.length > 0
+//     ? (reviewList.reduce((sum: number, r: any) => sum + r.rating, 0) / reviewList.length).toFixed(1)
+//     : null;
+
+//   return (
+//     <div className="flex flex-col gap-6">
+//       <h1 className="text-2xl font-bold">My Reviews</h1>
+
+//       {/* Summary */}
+//       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+//         <Card>
+//           <CardHeader className="pb-2">
+//             <CardTitle className="text-sm text-muted-foreground">Total Reviews</CardTitle>
+//           </CardHeader>
+//           <CardContent>
+//             <div className="text-3xl font-bold">{reviewList.length}</div>
+//           </CardContent>
+//         </Card>
+//         <Card>
+//           <CardHeader className="pb-2">
+//             <CardTitle className="text-sm text-muted-foreground">Average Rating</CardTitle>
+//           </CardHeader>
+//           <CardContent>
+//             <div className="text-3xl font-bold flex items-center gap-1">
+//               {avgRating ?? "—"}
+//               {avgRating && <Star className="h-6 w-6 fill-yellow-500 text-yellow-500" />}
+//             </div>
+//           </CardContent>
+//         </Card>
+//       </div>
+
+//       {/* Reviews List */}
+//       <Card>
+//         <CardHeader><CardTitle>All Reviews</CardTitle></CardHeader>
+//         <CardContent>
+//           {reviewList.length === 0 ? (
+//             <p className="text-muted-foreground text-sm py-4">No reviews yet.</p>
+//           ) : (
+//             <div className="flex flex-col divide-y">
+//               {reviewList.map((review: any) => (
+//                 <div key={review.id} className="py-4 first:pt-0 last:pb-0">
+//                   <div className="flex items-center justify-between mb-1">
+//                     <span className="font-medium text-sm">{review.student?.name}</span>
+//                     <div className="flex items-center gap-0.5">
+//                       {[1, 2, 3, 4, 5].map((s) => (
+//                         <Star
+//                           key={s}
+//                           className={`h-3.5 w-3.5 ${s <= review.rating ? "fill-yellow-500 text-yellow-500" : "text-muted-foreground"}`}
+//                         />
+//                       ))}
+//                     </div>
+//                   </div>
+//                   {review.comment && (
+//                     <p className="text-sm text-muted-foreground">{review.comment}</p>
+//                   )}
+//                   <p className="text-xs text-muted-foreground mt-1">
+//                     {new Date(review.createdAt).toLocaleDateString()}
+//                   </p>
+//                 </div>
+//               ))}
+//             </div>
+//           )}
+//         </CardContent>
+//       </Card>
+//     </div>
+//   );
+// }
+
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
+
+const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL
+  ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api`
+  : "http://localhost:5000/api";
+
+async function getMeClient() {
+  try {
+    const res = await fetch(`${API_URL}/users/me`, {
+      credentials: "include",
+      cache: "no-store",
+    });
+    const json = await res.json();
+    return { data: json ?? null, error: null };
+  } catch {
+    return { data: null, error: { message: "Something went wrong" } };
+  }
+}
+
+async function getReviewsByTutorClient(tutorProfileId: number | string) {
+  try {
+    const res = await fetch(`${API_URL}/reviews/tutor/${tutorProfileId}`, {
+      credentials: "include",
+      cache: "no-store",
+    });
+    const json = await res.json();
+    return { data: json ?? [], error: null };
+  } catch {
+    return { data: [], error: { message: "Something went wrong" } };
+  }
+}
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Star } from "lucide-react";
 
-export default async function TutorReviewsPage() {
-  const { data: session } = await userService.getSession();
+export default function TutorReviewsPage() {
+  const { data: session, isPending: sessionPending } = authClient.useSession();
+  const router = useRouter();
+
+  const [loading, setLoading] = useState(true);
+  const [tutorProfileId, setTutorProfileId] = useState<string | null>(null);
+  const [reviewList, setReviewList] = useState<any[]>([]);
+
   const user = session?.user as any;
 
-  if (user?.role !== "tutor") redirect("/dashboard");
+  useEffect(() => {
+    if (sessionPending) return;
 
-  // getMe returns user object with tutorProfile.id nested
-  const { data: me } = await userService.getMe();
-  const tutorProfileId = me?.tutorProfile?.id;
+    if (!session) {
+      router.replace("/login");
+      return;
+    }
+
+    if (user?.role !== "tutor") {
+      router.replace("/dashboard");
+      return;
+    }
+
+    (async () => {
+      try {
+        const { data: me } = await getMeClient();
+        const profileId = (me as any)?.tutorProfile?.id ?? null;
+        setTutorProfileId(profileId);
+
+        if (profileId) {
+          const { data: reviews } = await getReviewsByTutorClient(profileId);
+          setReviewList(Array.isArray(reviews) ? reviews : []);
+        }
+      } catch (err) {
+        console.error("Failed to load reviews:", err);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [session, sessionPending, user?.role, router]);
+
+  if (sessionPending || loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+          <p className="text-sm text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!tutorProfileId) {
     return (
@@ -27,12 +201,13 @@ export default async function TutorReviewsPage() {
     );
   }
 
-  const { data: reviews } = await reviewService.getReviewsByTutor(tutorProfileId);
-  const reviewList = Array.isArray(reviews) ? reviews : [];
-
-  const avgRating = reviewList.length > 0
-    ? (reviewList.reduce((sum: number, r: any) => sum + r.rating, 0) / reviewList.length).toFixed(1)
-    : null;
+  const avgRating =
+    reviewList.length > 0
+      ? (
+          reviewList.reduce((sum: number, r: any) => sum + r.rating, 0) /
+          reviewList.length
+        ).toFixed(1)
+      : null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -42,7 +217,9 @@ export default async function TutorReviewsPage() {
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Total Reviews</CardTitle>
+            <CardTitle className="text-sm text-muted-foreground">
+              Total Reviews
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{reviewList.length}</div>
@@ -50,12 +227,16 @@ export default async function TutorReviewsPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Average Rating</CardTitle>
+            <CardTitle className="text-sm text-muted-foreground">
+              Average Rating
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold flex items-center gap-1">
               {avgRating ?? "—"}
-              {avgRating && <Star className="h-6 w-6 fill-yellow-500 text-yellow-500" />}
+              {avgRating && (
+                <Star className="h-6 w-6 fill-yellow-500 text-yellow-500" />
+              )}
             </div>
           </CardContent>
         </Card>
@@ -63,7 +244,9 @@ export default async function TutorReviewsPage() {
 
       {/* Reviews List */}
       <Card>
-        <CardHeader><CardTitle>All Reviews</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle>All Reviews</CardTitle>
+        </CardHeader>
         <CardContent>
           {reviewList.length === 0 ? (
             <p className="text-muted-foreground text-sm py-4">No reviews yet.</p>
@@ -72,18 +255,26 @@ export default async function TutorReviewsPage() {
               {reviewList.map((review: any) => (
                 <div key={review.id} className="py-4 first:pt-0 last:pb-0">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="font-medium text-sm">{review.student?.name}</span>
+                    <span className="font-medium text-sm">
+                      {review.student?.name}
+                    </span>
                     <div className="flex items-center gap-0.5">
                       {[1, 2, 3, 4, 5].map((s) => (
                         <Star
                           key={s}
-                          className={`h-3.5 w-3.5 ${s <= review.rating ? "fill-yellow-500 text-yellow-500" : "text-muted-foreground"}`}
+                          className={`h-3.5 w-3.5 ${
+                            s <= review.rating
+                              ? "fill-yellow-500 text-yellow-500"
+                              : "text-muted-foreground"
+                          }`}
                         />
                       ))}
                     </div>
                   </div>
                   {review.comment && (
-                    <p className="text-sm text-muted-foreground">{review.comment}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {review.comment}
+                    </p>
                   )}
                   <p className="text-xs text-muted-foreground mt-1">
                     {new Date(review.createdAt).toLocaleDateString()}

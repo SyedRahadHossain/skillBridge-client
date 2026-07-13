@@ -37,6 +37,7 @@
 
 import { env } from "@/env";
 import { cookies, headers } from "next/headers";
+// import { cookies, headers } from "next/headers";
 
 const AUTH_URL = env.AUTH_URL;
 const API_URL = env.API_URL;
