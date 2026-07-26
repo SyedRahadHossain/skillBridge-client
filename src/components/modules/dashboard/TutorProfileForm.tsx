@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -9,10 +9,13 @@ import { Badge } from "@/components/ui/badge";
 import { Star } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 import { Category } from "@/types";
 
 interface TutorProfileFormProps {
   categories: Category[];
+  name: string;
+  email: string;
   existing?: {
     bio?: string;
     hourlyRate?: number;
@@ -25,9 +28,13 @@ interface TutorProfileFormProps {
 
 export default function TutorProfileForm({
   categories,
+  name,
+  email,
   existing,
 }: TutorProfileFormProps) {
   const router = useRouter();
+
+  // Tutor bio/rate/experience/subjects
   const [bio, setBio] = useState(existing?.bio || "");
   const [hourlyRate, setHourlyRate] = useState(
     existing?.hourlyRate?.toString() || "",
@@ -40,6 +47,7 @@ export default function TutorProfileForm({
   );
   const [loading, setLoading] = useState(false);
 
+  // Keep fields in sync once `existing` arrives from an async fetch
   useEffect(() => {
     if (existing) {
       setBio(existing.bio || "");
@@ -48,6 +56,16 @@ export default function TutorProfileForm({
       setSelectedCategories(existing.categoryIds || []);
     }
   }, [existing]);
+
+  // Name change
+  const [newName, setNewName] = useState(name);
+  const [nameLoading, setNameLoading] = useState(false);
+
+  // Password change
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordLoading, setPasswordLoading] = useState(false);
 
   const toggleCategory = (id: number) => {
     setSelectedCategories((prev) =>
@@ -91,6 +109,66 @@ export default function TutorProfileForm({
       toast.error("Something went wrong");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUpdateName = async () => {
+    if (!newName.trim()) {
+      toast.error("Name cannot be empty");
+      return;
+    }
+    if (newName === name) {
+      toast.error("Name is the same");
+      return;
+    }
+    setNameLoading(true);
+    try {
+      const { error } = await authClient.updateUser({ name: newName });
+      if (error) {
+        toast.error(error.message || "Failed to update name");
+        return;
+      }
+      toast.success("Name updated successfully!");
+      router.refresh();
+    } catch {
+      toast.error("Something went wrong");
+    } finally {
+      setNameLoading(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast.error("All password fields are required");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error("New passwords do not match");
+      return;
+    }
+    if (newPassword.length < 8) {
+      toast.error("New password must be at least 8 characters");
+      return;
+    }
+    setPasswordLoading(true);
+    try {
+      const { error } = await authClient.changePassword({
+        currentPassword,
+        newPassword,
+        revokeOtherSessions: false,
+      });
+      if (error) {
+        toast.error(error.message || "Failed to change password");
+        return;
+      }
+      toast.success("Password changed successfully!");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch {
+      toast.error("Something went wrong");
+    } finally {
+      setPasswordLoading(false);
     }
   };
 
@@ -158,7 +236,7 @@ export default function TutorProfileForm({
         </Card>
       )}
 
-      {/* Edit Form */}
+      {/* Edit Tutor Profile */}
       <Card>
         <CardHeader>
           <CardTitle>Edit Tutor Profile</CardTitle>
@@ -217,6 +295,83 @@ export default function TutorProfileForm({
             </Field>
             <Button onClick={handleSubmit} disabled={loading} className="w-fit">
               {loading ? "Saving..." : "Save Profile"}
+            </Button>
+          </FieldGroup>
+        </CardContent>
+      </Card>
+
+      {/* Update Name */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Update Name</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <FieldGroup>
+            <Field>
+              <FieldLabel>Full Name</FieldLabel>
+              <Input
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder="Your name"
+              />
+            </Field>
+            <Field>
+              <FieldLabel>Email</FieldLabel>
+              <Input value={email} disabled className="opacity-60" />
+            </Field>
+            <Button
+              onClick={handleUpdateName}
+              disabled={nameLoading}
+              size="sm"
+              className="w-fit"
+            >
+              {nameLoading ? "Saving..." : "Update Name"}
+            </Button>
+          </FieldGroup>
+        </CardContent>
+      </Card>
+
+      {/* Change Password */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Change Password</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <FieldGroup>
+            <Field>
+              <FieldLabel>Current Password</FieldLabel>
+              <Input
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Enter current password"
+              />
+            </Field>
+            <Field>
+              <FieldLabel>New Password</FieldLabel>
+              <Input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Min 8 characters"
+              />
+            </Field>
+            <Field>
+              <FieldLabel>Confirm New Password</FieldLabel>
+              <Input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Repeat new password"
+              />
+            </Field>
+            <Button
+              onClick={handleChangePassword}
+              disabled={passwordLoading}
+              size="sm"
+              className="w-fit"
+            >
+              {passwordLoading ? "Changing..." : "Change Password"}
             </Button>
           </FieldGroup>
         </CardContent>

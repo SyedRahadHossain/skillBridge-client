@@ -8,6 +8,7 @@ export const adminRoutes: Route[] = [
       { title: "Users", url: "/admin-dashboard/users" },
       { title: "Bookings", url: "/admin-dashboard/bookings" },
       { title: "Categories", url: "/admin-dashboard/categories" },
+      { title: "Profile", url: "/admin-dashboard/profile" },
     ],
   },
 ];
