@@ -5,12 +5,18 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Booking } from "@/types";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { BookOpen, CalendarDays, Clock, DollarSign } from "lucide-react";
 
-export default function BookingsManager({ bookings, total }: { bookings: Booking[]; total: number }) {
-  const router = useRouter();
+export default function BookingsManager({
+  bookings,
+  total,
+  onRefresh,
+}: {
+  bookings: Booking[];
+  total: number;
+  onRefresh: () => void | Promise<void>;
+}) {
   const [loadingId, setLoadingId] = useState<number | null>(null);
 
   const handleStatusChange = async (bookingId: number, status: string) => {
@@ -25,7 +31,7 @@ export default function BookingsManager({ bookings, total }: { bookings: Booking
       const data = await res.json();
       if (!res.ok) { toast.error(data.message || "Failed to update"); return; }
       toast.success(`Booking marked as ${status}!`);
-      router.refresh();
+      await onRefresh();
     } catch { toast.error("Something went wrong"); }
     finally { setLoadingId(null); }
   };

@@ -12,18 +12,17 @@ import {
 } from "@/components/ui/select";
 import { User } from "@/types";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { Users } from "lucide-react";
 
 export default function UsersManager({
   users,
   total,
+  onRefresh,
 }: {
   users: User[];
   total: number;
+  onRefresh: () => void | Promise<void>;
 }) {
-  const router = useRouter();
-
   const updateUser = async (
     userId: string,
     data: { isActive?: boolean; role?: string },
@@ -45,7 +44,8 @@ export default function UsersManager({
         return;
       }
       toast.success(successMsg);
-      router.refresh();
+      console.log("onRefresh is:");
+      await onRefresh();
     } catch {
       toast.error("Something went wrong");
     }
@@ -68,7 +68,6 @@ export default function UsersManager({
               key={user.id}
               className="flex flex-col sm:flex-row sm:items-center gap-3 px-5 py-3"
             >
-              {/* Avatar + Info */}
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center font-bold text-sm text-primary flex-shrink-0">
                   {user.name.charAt(0).toUpperCase()}
@@ -86,7 +85,6 @@ export default function UsersManager({
                 </div>
               </div>
 
-              {/* Actions */}
               <div className="flex items-center gap-2 flex-wrap">
                 <Badge
                   variant={user.isActive ? "default" : "destructive"}
@@ -141,3 +139,4 @@ export default function UsersManager({
     </Card>
   );
 }
+

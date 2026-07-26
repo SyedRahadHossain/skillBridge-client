@@ -5,16 +5,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { Category } from "@/types";
 import { Pencil, Trash2, X, Check, Plus, Tag } from "lucide-react";
 
 export default function CategoriesManager({
   categories,
+  onRefresh,
 }: {
   categories: Category[];
+  onRefresh: () => void | Promise<void>;
 }) {
-  const router = useRouter();
   const [newName, setNewName] = useState("");
   const [newIcon, setNewIcon] = useState("");
   const [adding, setAdding] = useState(false);
@@ -46,7 +46,7 @@ export default function CategoriesManager({
       toast.success("Category added!");
       setNewName("");
       setNewIcon("");
-      router.refresh();
+      await onRefresh();
     } catch {
       toast.error("Something went wrong");
     } finally {
@@ -78,7 +78,7 @@ export default function CategoriesManager({
       }
       toast.success("Category updated!");
       setEditingId(null);
-      router.refresh();
+      await onRefresh();
     } catch {
       toast.error("Something went wrong");
     }
@@ -100,7 +100,7 @@ export default function CategoriesManager({
         return;
       }
       toast.success("Category deleted!");
-      router.refresh();
+      await onRefresh();
     } catch {
       toast.error("Something went wrong");
     }
