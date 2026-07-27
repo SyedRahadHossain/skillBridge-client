@@ -14,8 +14,6 @@ import { Category } from "@/types";
 
 interface TutorProfileFormProps {
   categories: Category[];
-  name: string;
-  email: string;
   existing?: {
     bio?: string;
     hourlyRate?: number;
@@ -28,8 +26,6 @@ interface TutorProfileFormProps {
 
 export default function TutorProfileForm({
   categories,
-  name,
-  email,
   existing,
 }: TutorProfileFormProps) {
   const router = useRouter();
@@ -56,10 +52,6 @@ export default function TutorProfileForm({
       setSelectedCategories(existing.categoryIds || []);
     }
   }, [existing]);
-
-  // Name change
-  const [newName, setNewName] = useState(name);
-  const [nameLoading, setNameLoading] = useState(false);
 
   // Password change
   const [currentPassword, setCurrentPassword] = useState("");
@@ -109,31 +101,6 @@ export default function TutorProfileForm({
       toast.error("Something went wrong");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleUpdateName = async () => {
-    if (!newName.trim()) {
-      toast.error("Name cannot be empty");
-      return;
-    }
-    if (newName === name) {
-      toast.error("Name is the same");
-      return;
-    }
-    setNameLoading(true);
-    try {
-      const { error } = await authClient.updateUser({ name: newName });
-      if (error) {
-        toast.error(error.message || "Failed to update name");
-        return;
-      }
-      toast.success("Name updated successfully!");
-      router.refresh();
-    } catch {
-      toast.error("Something went wrong");
-    } finally {
-      setNameLoading(false);
     }
   };
 
@@ -295,37 +262,6 @@ export default function TutorProfileForm({
             </Field>
             <Button onClick={handleSubmit} disabled={loading} className="w-fit">
               {loading ? "Saving..." : "Save Profile"}
-            </Button>
-          </FieldGroup>
-        </CardContent>
-      </Card>
-
-      {/* Update Name */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Update Name</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <FieldGroup>
-            <Field>
-              <FieldLabel>Full Name</FieldLabel>
-              <Input
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                placeholder="Your name"
-              />
-            </Field>
-            <Field>
-              <FieldLabel>Email</FieldLabel>
-              <Input value={email} disabled className="opacity-60" />
-            </Field>
-            <Button
-              onClick={handleUpdateName}
-              disabled={nameLoading}
-              size="sm"
-              className="w-fit"
-            >
-              {nameLoading ? "Saving..." : "Update Name"}
             </Button>
           </FieldGroup>
         </CardContent>
