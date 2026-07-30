@@ -148,7 +148,9 @@ const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL
 
 async function getTutorByIdClient(tutorId: string) {
   try {
-    const res = await fetch(`${API_URL}/tutors/${tutorId}`, { cache: "no-store" });
+    const res = await fetch(`${API_URL}/tutors/${tutorId}`, {
+      cache: "no-store",
+    });
     if (!res.ok) return { data: null, error: { message: "Not found" } };
     const json = await res.json();
     return { data: json ?? null, error: null };
@@ -196,7 +198,9 @@ export default function TutorDetailPage({
       setTutor(tutorObj);
 
       const { data: reviews } = await getReviewsByTutorClient(tutorObj.id);
-      setReviewList(Array.isArray(reviews) ? reviews : (reviews as any)?.data ?? []);
+      setReviewList(
+        Array.isArray(reviews) ? reviews : ((reviews as any)?.data ?? []),
+      );
       setLoading(false);
     })();
   }, [params]);
@@ -226,16 +230,24 @@ export default function TutorDetailPage({
   const avgRating =
     reviewList.length > 0
       ? (
-          reviewList.reduce((sum, r: any) => sum + r.rating, 0) / reviewList.length
+          reviewList.reduce((sum, r: any) => sum + r.rating, 0) /
+          reviewList.length
         ).toFixed(1)
       : null;
 
   const bookingCard = isStudent ? (
-    <BookingForm tutorProfileId={tutor.id} hourlyRate={tutor.hourlyRate} />
+    // <BookingForm tutorProfileId={tutor.id} hourlyRate={tutor.hourlyRate} />
+    <BookingForm
+      tutorProfileId={tutor.id}
+      hourlyRate={tutor.hourlyRate}
+      availability={tutor.availability || []}
+    />
   ) : (
     <Card>
       <CardContent className="p-6 text-center text-muted-foreground text-sm">
-        {isLoggedIn ? "Only students can book tutors." : "Log in as a student to book."}
+        {isLoggedIn
+          ? "Only students can book tutors."
+          : "Log in as a student to book."}
       </CardContent>
     </Card>
   );
@@ -269,8 +281,8 @@ export default function TutorDetailPage({
                   )}
                   <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">
-                      <Clock className="h-3.5 w-3.5" /> {tutor.experience || 0} yrs
-                      experience
+                      <Clock className="h-3.5 w-3.5" /> {tutor.experience || 0}{" "}
+                      yrs experience
                     </span>
                     <span className="font-medium text-foreground">
                       ${tutor.hourlyRate}/hr
@@ -295,7 +307,10 @@ export default function TutorDetailPage({
                   </h3>
                   <div className="flex flex-wrap gap-2">
                     {tutor.categories.map((cat: any) => (
-                      <Badge key={cat.category?.id ?? cat.categoryId} variant="secondary">
+                      <Badge
+                        key={cat.category?.id ?? cat.categoryId}
+                        variant="secondary"
+                      >
                         {cat.category?.icon} {cat.category?.name}
                       </Badge>
                     ))}
@@ -308,7 +323,9 @@ export default function TutorDetailPage({
           {/* Reviews */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">Reviews ({reviewList.length})</CardTitle>
+              <CardTitle className="text-base">
+                Reviews ({reviewList.length})
+              </CardTitle>
             </CardHeader>
             <CardContent>
               {reviewList.length === 0 ? (
@@ -316,7 +333,10 @@ export default function TutorDetailPage({
               ) : (
                 <div className="flex flex-col gap-4">
                   {reviewList.map((review: any) => (
-                    <div key={review.id} className="border-b pb-4 last:border-0 last:pb-0">
+                    <div
+                      key={review.id}
+                      className="border-b pb-4 last:border-0 last:pb-0"
+                    >
                       <div className="flex items-center justify-between mb-1 gap-2">
                         <span className="font-medium text-sm truncate">
                           {review.student.name}
@@ -335,7 +355,9 @@ export default function TutorDetailPage({
                         </div>
                       </div>
                       {review.comment && (
-                        <p className="text-muted-foreground text-sm">{review.comment}</p>
+                        <p className="text-muted-foreground text-sm">
+                          {review.comment}
+                        </p>
                       )}
                       <p className="text-xs text-muted-foreground mt-1">
                         {new Date(review.createdAt).toLocaleDateString()}
